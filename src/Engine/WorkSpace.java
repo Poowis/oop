@@ -6,24 +6,45 @@
 package Engine;
 
 import Exception.FileException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  *
  * @author Poowis
  */
-public class WorkSpace {
+public final class WorkSpace implements Serializable {
 
     private Data data;
+    private String dataPath;
+    private HashMap<String, Object> settings;
+
+    public WorkSpace() {
+    }
+
+    public WorkSpace(String path) throws IOException, FileNotFoundException, FileException {
+        importData(path);
+    }
 
     public void importData(String path) throws IOException, FileNotFoundException, FileException {
-        if (data != null) {
+        File file = new File(path);
+        if (file.exists()) {
             data = new Data(path);
+            this.dataPath = path;
         } else {
-            Data tmp = new Data(path);
-            if
-        
+            throw new FileException("Data file can not be found");
+        }
+    }
+
+    public void update() throws IOException, FileNotFoundException, FileException {
+        File file = new File(dataPath);
+        if (file.exists()) {
+            data = new Data(dataPath);
+        } else {
+            throw new FileException("Data file is Missing");
         }
     }
 
