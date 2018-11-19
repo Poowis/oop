@@ -17,9 +17,9 @@ import java.util.ArrayList;
  *
  * @author Poowis
  */
-public class DataInput {
+public class DataIO {
 
-    public DataInput() {
+    public DataIO() {
 
     }
 

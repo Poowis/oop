@@ -6,7 +6,7 @@
 package Engine;
 
 import Exception.FileException;
-import InputAndOutput.DataInput;
+import InputAndOutput.DataIO;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class Data implements Iterable<ArrayList> {
     }
 
     public final void setData(String path) throws IOException, FileNotFoundException, FileException {
-        ArrayList<ArrayList<Object>> tmp = DataInput.getData(path);
+        ArrayList<ArrayList<Object>> tmp = DataIO.getData(path);
         metaInfo = new ArrayList<>();
         for (Object value : tmp.get(0)) {
             String s = (String) value;
