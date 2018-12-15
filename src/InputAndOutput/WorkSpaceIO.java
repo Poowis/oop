@@ -21,7 +21,7 @@ import java.io.ObjectOutputStream;
  */
 public class WorkSpaceIO {
 
-    public static WorkSpace loadWorkSpace(String path) throws FileException, FileNotFoundException, IOException, ClassNotFoundException {
+    public static WorkSpace ImportWorkSpace(String path) throws FileException, FileNotFoundException, IOException, ClassNotFoundException {
         File file = new File(path);
         WorkSpace ws = null;
         if (file.exists()) {
@@ -34,8 +34,8 @@ public class WorkSpaceIO {
         return ws;
     }
 
-    public static void saveWorkSpace(String path, WorkSpace ws) throws FileNotFoundException, IOException {
-        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(path))) {
+    public static void ExportWorkSpace(String path, WorkSpace ws) throws FileNotFoundException, IOException {
+        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(path+".ws"))) {
             output.writeObject(ws);
         }
     }

@@ -6,6 +6,9 @@
 package Engine;
 
 import Exception.FileException;
+import InputAndOutput.MainIO;
+import InputAndOutput.WorkSpaceIO;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
@@ -19,22 +22,59 @@ public class Main implements Serializable {
 
     private WorkSpace currentWS;
     private ArrayList<WorkSpace> recentWS;
-    private final int MAX_WS = 5;
+    private final int MAX_WS = 10;
 
     public Main() {
+        currentWS = new WorkSpace();
         recentWS = new ArrayList<>(MAX_WS);
     }
-    
-    public void importWS(String path) throws IOException, FileNotFoundException, FileException {
-        changeRecentWS(currentWS);
-        currentWS = new WorkSpace(path);
+
+    public void newWS() throws IOException, FileNotFoundException, FileException {
+        changeRecentWS();
+        currentWS = new WorkSpace();
     }
 
-    private void changeRecentWS(WorkSpace ws) {
+    public void loadWS(int index) throws IOException, FileNotFoundException, FileException {
+        changeRecentWS();
+        currentWS = recentWS.get(index);
+    }
+
+    public void importWS(String path) throws IOException, FileNotFoundException, FileException, ClassNotFoundException {
+        changeRecentWS();
+        currentWS = WorkSpaceIO.ImportWorkSpace(path);
+    }
+
+    public void exportWS(String path) throws IOException, FileNotFoundException, FileException, ClassNotFoundException {
+        WorkSpaceIO.ExportWorkSpace(path, currentWS);
+    }
+
+    private void changeRecentWS() throws IOException {
+//        String path = "workspace/" + new File(currentWS.getDataPath()).getName() + ".dat";
+//        WorkSpaceIO.ExportWorkSpace(path, currentWS);
         if (recentWS.size() == MAX_WS) {
             recentWS.remove(0);
         }
-        recentWS.add(ws);
+        recentWS.add(currentWS);
+    }
+
+    public WorkSpace getCurrentWS() {
+        return currentWS;
+    }
+
+    public ArrayList<WorkSpace> getRecentWS() {
+        return recentWS;
+    }
+    
+    public static void main(String[] args) {
+        Main main = new Main();
+        try {
+            main.newWS();
+            main.getCurrentWS().importData("C:\\Users\\Poowis\\Desktop\\grades.csv");
+            main.newWS();
+            main.getCurrentWS().importData("C:\\Users\\Poowis\\Desktop\\sales.csv");
+            MainIO.saveMain(main);
+        } catch (IOException | FileException ex) {
+        }
     }
 
 }

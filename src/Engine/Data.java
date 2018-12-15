@@ -9,6 +9,7 @@ import Exception.FileException;
 import InputAndOutput.DataIO;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -16,7 +17,7 @@ import java.util.Iterator;
  *
  * @author Poowis
  */
-public class Data implements Iterable<ArrayList> {
+public class Data implements Iterable<ArrayList>, Serializable {
 
     private ArrayList<String> metaInfo;
     private ArrayList<Integer> dataSize;
@@ -43,6 +44,11 @@ public class Data implements Iterable<ArrayList> {
         dataSize.add(metaInfo.size());
 
     }
+    
+    public Data(ArrayList<String> metaInfo, ArrayList<ArrayList<Object>> data) {
+        this.data = data;
+        this.metaInfo = metaInfo;
+    }
 
     public ArrayList<String> getMetaInfo() {
         return metaInfo;
@@ -64,8 +70,8 @@ public class Data implements Iterable<ArrayList> {
         return data.get(index);
     }
 
-    public Object get(int indexO, int indexI) {
-        return data.get(indexO).get(indexI);
+    public Object get(int row, int col) {
+        return data.get(row).get(col);
     }
 
     @Override

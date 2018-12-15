@@ -48,4 +48,17 @@ public final class WorkSpace implements Serializable {
         }
     }
 
+    public Data getData() {
+        return data;
+    }
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    @Override
+    public String toString() {
+        return new File(dataPath).getName();
+    }
+
 }

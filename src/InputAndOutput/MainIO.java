@@ -14,6 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,8 +23,8 @@ import java.io.ObjectOutputStream;
  */
 public class MainIO {
 
-    public static Main loadMain(String path) throws FileException, FileNotFoundException, IOException, ClassNotFoundException {
-        File file = new File(path);
+    public static Main loadMain() throws FileException, FileNotFoundException, IOException, ClassNotFoundException {
+        File file = new File("main.dat");
         Main main = null;
         if (file.exists()) {
             try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(file))) {
