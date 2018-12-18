@@ -19,9 +19,9 @@ import java.util.Iterator;
  */
 public class Data implements Iterable<ArrayList>, Serializable {
 
-    private ArrayList<String> metaInfo;
-    private ArrayList<Integer> dataSize;
-    private ArrayList<ArrayList<Object>> data;
+    protected ArrayList<String> metaInfo;
+    protected ArrayList<Integer> dataSize;
+    protected ArrayList<ArrayList<Object>> data;
 
     public Data() {
     }
@@ -48,6 +48,9 @@ public class Data implements Iterable<ArrayList>, Serializable {
     public Data(ArrayList<String> metaInfo, ArrayList<ArrayList<Object>> data) {
         this.data = data;
         this.metaInfo = metaInfo;
+        dataSize = new ArrayList<>();
+        dataSize.add(data.size());
+        dataSize.add(metaInfo.size());
     }
 
     public ArrayList<String> getMetaInfo() {

@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 public class Main implements Serializable {
 
     private WorkSpace currentWS;
+    private Data currentShow;
     private ArrayList<WorkSpace> recentWS;
     private final int MAX_WS = 10;
 
@@ -35,8 +37,9 @@ public class Main implements Serializable {
     }
 
     public void loadWS(int index) throws IOException, FileNotFoundException, FileException {
+        WorkSpace tmp = recentWS.get(index);
         changeRecentWS();
-        currentWS = recentWS.get(index);
+        currentWS = tmp;
     }
 
     public void importWS(String path) throws IOException, FileNotFoundException, FileException, ClassNotFoundException {
@@ -48,13 +51,17 @@ public class Main implements Serializable {
         WorkSpaceIO.ExportWorkSpace(path, currentWS);
     }
 
-    private void changeRecentWS() throws IOException {
+    public void changeRecentWS() throws IOException {
 //        String path = "workspace/" + new File(currentWS.getDataPath()).getName() + ".dat";
 //        WorkSpaceIO.ExportWorkSpace(path, currentWS);
+        if (recentWS.contains(currentWS)) {
+            recentWS.remove(currentWS);
+        }
         if (recentWS.size() == MAX_WS) {
             recentWS.remove(0);
         }
         recentWS.add(currentWS);
+
     }
 
     public WorkSpace getCurrentWS() {
@@ -64,7 +71,15 @@ public class Main implements Serializable {
     public ArrayList<WorkSpace> getRecentWS() {
         return recentWS;
     }
-    
+
+    public void update() throws IOException, FileNotFoundException, FileException {
+        currentWS.update();
+    }
+
+    public void importData(String path) throws IOException, FileNotFoundException, FileException {
+        currentWS.importData(path);
+    }
+
     public static void main(String[] args) {
         Main main = new Main();
         try {

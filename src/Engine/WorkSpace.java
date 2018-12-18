@@ -56,9 +56,21 @@ public final class WorkSpace implements Serializable {
         return dataPath;
     }
 
+    public HashMap<String, Object> getSettings() {
+        return settings;
+    }
+
+    public void setSettings(HashMap<String, Object> settings) {
+        this.settings = settings;
+    }
+
     @Override
     public String toString() {
-        return new File(dataPath).getName();
+        try {
+            return new File(dataPath).getName();
+        } catch(Exception ex) {
+            return "Untitled";
+        }
     }
 
 }

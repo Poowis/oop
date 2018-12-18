@@ -54,7 +54,7 @@ public class Tester {
 //        }
 //    }
     public static void main(String[] args) {
-        System.out.println("aswed - -a".matches(".*-.*"));
+        System.out.println("aswed -- -a".matches(".*(-|--).*"));
         System.out.println(Arrays.toString("aswed - a".split(" *- *", 2)));
     }
 }

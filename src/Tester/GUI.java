@@ -15,6 +15,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
@@ -34,7 +36,7 @@ public class GUI extends JFrame {
     JMenuItem newWS, importWS, exportWS, save, saveExit;
     JMenuItem importData, updateData;
 
-    JPanel controlPn;
+    ControlPanel ctpn;
     JScrollPane scrollPane;
     JTable table;
     JTextField alert;
@@ -83,58 +85,56 @@ public class GUI extends JFrame {
         scrollPane = new JScrollPane();
         scrollPane.setViewportView(table);
         table.setEnabled(false);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         add(scrollPane);
 
 //Control Panel
-        controlPn = new JPanel();
-        controlPn.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-//        add(controlPn, BorderLayout.EAST);
-        add(new ControlPanel(), BorderLayout.EAST);
-
-        alert = new JTextField(20);
-        alert.setEditable(false);
-        controlPn.add(alert);
+        ctpn = new ControlPanel(main, table);
+        add(ctpn, BorderLayout.EAST);
 
 //Set JFrame
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("Data");
-        setSize(1000, 500);
+        setSize(1000, 600);
         setLocationRelativeTo(null);
         setVisible(true);
 
 //Add Action
         newWS.addActionListener((ActionEvent evt) -> {
+            main.getCurrentWS().setSettings(ctpn.getSettings());
             try {
                 main.newWS();
-            } catch (Exception ex) {
+                update();
+            } catch (FileException | IOException ex) {
                 alert.setText(ex.toString());
             }
         });
         importWS.addActionListener((ActionEvent evt) -> {
+            main.getCurrentWS().setSettings(ctpn.getSettings());
             try {
-                String path = getPath("Import WorkSpace", "Import");
+                String path = getWSPath("Import WorkSpace", "Import");
                 if (path != null) {
                     main.importWS(path);
+                    update();
                 }
-            } catch (Exception ex) {
+            } catch (FileException | IOException | ClassNotFoundException ex) {
                 alert.setText(ex.toString());
             }
         });
         exportWS.addActionListener((ActionEvent evt) -> {
             try {
-                String path = getPath("Export WorkSpace", "Export");
+                String path = getWSPath("Export WorkSpace", "Export");
                 if (path != null) {
                     main.exportWS(path);
                 }
-            } catch (Exception ex) {
+            } catch (FileException | IOException | ClassNotFoundException ex) {
                 alert.setText(ex.toString());
             }
         });
         save.addActionListener((ActionEvent evt) -> {
             try {
                 MainIO.saveMain(main);
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 alert.setText(ex.toString());
             }
         });
@@ -142,64 +142,95 @@ public class GUI extends JFrame {
             try {
                 MainIO.saveMain(main);
                 System.exit(0);
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 alert.setText(ex.toString());
             }
         });
         importData.addActionListener((ActionEvent evt) -> {
             try {
-                String path = getPath("Import Data", "Import");
+                String path = getDataPath("Import Data", "Import");
                 if (path != null) {
-                    main.getCurrentWS().importData(path);
-                    updateTable();
+                    main.importData(path);
+                    update();
                 }
-            } catch (Exception ex) {
+            } catch (FileException | IOException ex) {
                 alert.setText(ex.toString());
             }
         });
         updateData.addActionListener((ActionEvent evt) -> {
             try {
-                main.getCurrentWS().update();
-                updateTable();
-            } catch (Exception ex) {
+                main.update();
+                update();
+            } catch (FileException | IOException ex) {
                 alert.setText(ex.toString());
             }
         });
-        
-        
-        updateRecentWS();
 
+        update();
+
+    }
+
+    private void updateCtPn() {
+        if (main.getCurrentWS() != null && main.getCurrentWS().getSettings() != null) {
+            ctpn.setSettings(main.getCurrentWS().getSettings());
+        } else {
+            ctpn.setDefault();
+        }
     }
 
     private void updateTable() {
-        Data dt = main.getCurrentWS().getData();
-        if (main.getCurrentWS() == null | dt == null) {
-            return;
-        }
-        DefaultTableModel model = new DefaultTableModel();
-        for (Object column : dt.getMetaInfo()) {
-            model.addColumn(column);
-        }
-        for (int i = 0; i < dt.getDataSize().get(0); i++) {
-            model.addRow(new Object[0]);
-            for (int j = 0; j < dt.getDataSize().get(1); j++) {
-                model.setValueAt(dt.get(i, j), i, j);
+        if (main.getCurrentWS() != null && main.getCurrentWS().getData() != null) {
+            Data dt = main.getCurrentWS().getData();
+            DefaultTableModel model = new DefaultTableModel();
+            for (Object column : dt.getMetaInfo()) {
+                model.addColumn(column);
             }
+            for (int i = 0; i < dt.getDataSize().get(0); i++) {
+                model.addRow(new Object[0]);
+                for (int j = 0; j < dt.getDataSize().get(1); j++) {
+                    model.setValueAt(dt.get(i, j), i, j);
+                }
+            }
+            table.setModel(model);
+        } else {
+            table.setModel(new DefaultTableModel());
         }
-        table.setModel(model);
     }
+
+    private HashMap<JMenuItem, Integer> WSmap;
 
     private void updateRecentWS() {
+        WSmap = new HashMap<>();
         loadWS.removeAll();
-        for (Integer i =0 ; i<5; i++) {
-            loadWS.add(new JMenuItem(i.toString()));
+        Integer i = 0;System.out.print(main.getRecentWS());
+                        System.out.println(main.getCurrentWS());
+        for (WorkSpace ws : main.getRecentWS()) {
+            JMenuItem jmi = new JMenuItem(ws.toString());
+            System.out.println(i+" "+jmi.getText());
+            
+            loadWS.add(jmi, 0);
+            WSmap.put(jmi, i++);
+            jmi.addActionListener((ActionEvent evt) -> {
+                main.getCurrentWS().setSettings(ctpn.getSettings());
+                try {
+                    main.loadWS(WSmap.get((JMenuItem) evt.getSource()));
+                    update();
+                } catch (IOException | FileException ex) {
+                    alert.setText("cannot load WorkSpace");
+                }
+            });
         }
-//        for (WorkSpace ws : main.getRecentWS()) {
-//            loadWS.add(new JMenuItem(ws.toString()));
-//        }
     }
 
-    private String getPath(String dialog, String button) {
+    private void update() {
+        updateTable();
+        updateRecentWS();
+        updateCtPn();
+        ctpn.setHeader();
+        
+    }
+
+    private String getWSPath(String dialog, String button) {
         JFileChooser jf = new JFileChooser();
         jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         jf.setFileFilter(new FileNameExtensionFilter("WorkSpace", "ws"));
@@ -211,9 +242,37 @@ public class GUI extends JFrame {
         return null;
     }
 
+    private String getDataPath(String dialog, String button) {
+        JFileChooser jf = new JFileChooser();
+        jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        jf.setFileFilter(new FileNameExtensionFilter("Data .csv .excel", "csv", "xlsx", "xls"));
+        jf.setDialogTitle(dialog);
+        jf.setApproveButtonText(button);
+        if (jf.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            return jf.getSelectedFile().getAbsolutePath();
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
         GUI obj = new GUI();
         obj.init();
+        Thread t;
+        t = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+//                        System.out.print(obj.main.getRecentWS());
+//                        System.out.println(obj.main.getCurrentWS());
+//                        System.out.println(obj.WSmap);
+                        sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        };
+        t.start();
     }
 
 }
